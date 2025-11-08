@@ -1,5 +1,5 @@
 import time
-import statics
+from statistics import Counter
 import RPi.GPIO as GPIO
 from hx711 import HX711
 
@@ -9,7 +9,7 @@ GPIO.setmode(GPIO.BCM)
 buzzer = 21
 GPIO.setup(buzzer, GPIO.OUT)
 offset_data = hx.get_raw_data(times = 30)
-offset = sum(offset_data)/len(offset_data)정
+offset = sum(offset_data)/len(offset_data)
 
 def get_weight():
     return (sum(hx.get_raw_data())/5 - offset)/100
@@ -20,7 +20,7 @@ weight_last5 = [] #queue
 for _ in range(5):
     weight_last5.append(int(get_weight()))
 count = Counter(weight_last5) # 각 수의 빈도수 확인
-weight_mode = count.most_common(1) # 최빈값 저장
+weight_mode = count.most_common(1)[0][0] # 최빈값 저장
 
 print("start")
 
@@ -29,10 +29,10 @@ try:
         hx.reset()
         #queue update
         weight_last5.pop(0)
-        weight_last5.append(int(get_weight())
+        weight_last5.append(int(get_weight()))
         
         count_tmp = Counter(weight_last5)
-        weight_tmp = count_tmp.most_common(1) # weight_mode 변수는 이전값으로 취급
+        weight_tmp = count_tmp.most_common(1)[0][0] # weight_mode 변수는 이전값으로 취급
         
         print("data: ", weight_last5[-1])
         
