@@ -2,6 +2,7 @@ import time
 from statistics import Counter
 import RPi.GPIO as GPIO
 from hx711 import HX711
+import opencvTest
 
 #핀 설정 및 저울 오프셋 설정
 hx = HX711(dout_pin = 5, pd_sck_pin = 6)
@@ -12,7 +13,7 @@ offset_data = hx.get_raw_data(times = 30)
 offset = sum(offset_data)/len(offset_data)
 
 def get_weight():
-    return (sum(hx.get_raw_data())/5 - offset)/100
+    return (sum(hx.get_raw_data(times=3))/3 - offset)/100
 
 weight_last5 = [] #queue
 
@@ -21,6 +22,7 @@ for _ in range(5):
     weight_last5.append(int(get_weight()))
 count = Counter(weight_last5) # 각 수의 빈도수 확인
 weight_mode = count.most_common(1)[0][0] # 최빈값 저장
+GPIO.output(buzzer, GPIO.LOW)
 
 print("start")
 
@@ -36,7 +38,8 @@ try:
         
         print("data: ", weight_last5[-1])
         
-        if weight_tmp + 10 < weight_mod:
+        if weight_tmp + 10 < weight_mode:
+            #opencvTest.main()
             GPIO.output(buzzer, GPIO.HIGH)
             print("도난 발생!")
             time.sleep(5)
